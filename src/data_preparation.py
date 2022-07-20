@@ -10,7 +10,8 @@ def get_birth_data():
     data['date'] = pd.to_datetime(data[['year', 'month', 'day']])
     data['ids'] = np.arange(1, data.shape[0]+1)
     data['weekday'] = data.day_of_week.apply(lambda x: 1 if x in [1,2,3,4,5] else 0)
-    data['births_relative100'] = data.births.apply(lambda x: x/np.mean(data.births)*100)
+    data['monday'] = data.day_of_week.apply(lambda x: 1 if x != 1 else 0)
+    # data['births_relative100'] = data.births.apply(lambda x: x/np.mean(data.births)*100)
     data['seasons'] = data.month.apply(set_season)
 
     y = data.births
@@ -57,3 +58,21 @@ def separate_data(data, normalised=None, weekdays=None):
     y = tf.reshape(y, [y.shape[0],1])
 
     return x, y
+
+def separate_data_with_monday_flag(data, normalised=None):
+    x = data.ids
+    m = data.monday
+    y = data.births
+    if normalised:
+        y = data.normalised_births
+    else :
+        y = y - np.mean(y)
+    
+    x = tf.cast(x, tf.float64)
+    y = tf.cast(y, tf.float64)
+    m = tf.cast(m, tf.float64)
+    x = tf.reshape(x, [x.shape[0],1])
+    y = tf.reshape(y, [y.shape[0],1])
+    m = tf.reshape(m, [m.shape[0],1])
+
+    return x, y, m
