@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 
 
 def get_birth_data():
@@ -76,3 +77,13 @@ def separate_data_with_monday_flag(data, normalised=None):
     m = tf.reshape(m, [m.shape[0],1])
 
     return x, y, m
+
+
+def train_test_save(data):
+    df_train, df_test = train_test_split(data, test_size=0.3, random_state=42)
+    df_train = df_train.sort_values(by='ids')
+    df_test = df_test.sort_values(by='ids')
+
+    df_train.to_csv("../data/train.csv")
+    df_test.to_csv("../data/test.csv")
+    
