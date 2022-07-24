@@ -12,13 +12,7 @@ def get_birth_data():
     data['ids'] = np.arange(1, data.shape[0]+1)
     data['weekday'] = data.day_of_week.apply(lambda x: 1 if x in [1,2,3,4,5] else 0)
     data['monday'] = data.day_of_week.apply(lambda x: 1 if x != 1 else 0)
-    # data['births_relative100'] = data.births.apply(lambda x: x/np.mean(data.births)*100)
     data['seasons'] = data.month.apply(set_season)
-
-    y = data.births
-    s = StandardScaler()
-    y = np.reshape(y.to_numpy(), (y.shape[0],1))
-    data['normalised_births'] = s.fit_transform(y)
 
     return data
 
@@ -32,26 +26,38 @@ def set_season(x):
         return 3 
     else:
         return 4
-    
-
-def plot_data(x, y):
-    plt.figure(figsize=(20,7))
-    plt.plot(x, y, '.')
-    plt.xlabel('Date')
-    plt.ylabel('Number of births')
-    plt.title('Births per year')
-    plt.show()
 
 
-def separate_data(data, normalised=None, weekdays=None):
-    if weekdays:
+def train_test_save(data):
+    df_train, df_test = train_test_split(data, test_size=0.3, random_state=42)
+    df_train = df_train.sort_values(by='ids')
+    df_test = df_test.sort_values(by='ids')
+
+    s = StandardScaler()
+    y_train = df_train.births
+    y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
+    y_train = s.fit_transform(y_train)
+    df_train['births'] = y_train
+    y_test = df_test.births
+    y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
+    y_test = s.transform(y_test)
+    df_test['births'] = y_test
+
+    df_train.to_csv("../data/train.csv", index=False)
+    df_test.to_csv("../data/test.csv", index=False)
+
+    # incase we want to use them again later to convert back to original feature space
+    scaling_params = pd.DataFrame({'Mean': s.mean_, 'Std': s.scale_})
+    scaling_params.to_csv("../data/scaling_params.csv", index=False)
+
+
+def separate_data(data, weekdays=None):
+    if weekdays == 'weekdays':
         data = data.loc[data.weekday==1]
+    if weekdays == 'weekends':
+        data = data.loc[data.weekday==0]
     x = data.ids
     y = data.births
-    if normalised:
-        y = data.normalised_births
-    else :
-        y = y - np.mean(y)
     
     x = tf.cast(x, tf.float64)
     y = tf.cast(y, tf.float64)
@@ -60,14 +66,11 @@ def separate_data(data, normalised=None, weekdays=None):
 
     return x, y
 
-def separate_data_with_monday_flag(data, normalised=None):
+
+def separate_data_with_monday_flag(data):
     x = data.ids
     m = data.monday
     y = data.births
-    if normalised:
-        y = data.normalised_births
-    else :
-        y = y - np.mean(y)
     
     x = tf.cast(x, tf.float64)
     y = tf.cast(y, tf.float64)
@@ -79,11 +82,7 @@ def separate_data_with_monday_flag(data, normalised=None):
     return x, y, m
 
 
-def train_test_save(data):
-    df_train, df_test = train_test_split(data, test_size=0.3, random_state=42)
-    df_train = df_train.sort_values(by='ids')
-    df_test = df_test.sort_values(by='ids')
 
-    df_train.to_csv("../data/train.csv")
-    df_test.to_csv("../data/test.csv")
+
+    
     
