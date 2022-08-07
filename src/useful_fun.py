@@ -18,7 +18,7 @@ def plot_distribution(X, Y, mean, var, pos, labels, legend=True):
     plt.tick_params(axis='both', which='major', labelsize=12)
 
     if legend:
-        plt.legend()
+        plt.legend(prop={'size':14})
 
     plt.show()
     plt.close()
