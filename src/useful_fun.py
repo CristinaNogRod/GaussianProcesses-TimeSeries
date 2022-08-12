@@ -30,3 +30,35 @@ def percentage_outof_CI(Y, mean, var):
     upper = mean + c
     points_outof_bounds = (Y < lower) | (Y > upper)
     return np.mean(points_outof_bounds) * 100
+
+
+def number_outof_CI(Y, mean, var):
+    c = 1.96 * np.sqrt(var)
+    lower = mean - c
+    upper = mean + c
+    points_outof_bounds = (Y < lower) | (Y > upper)
+    return np.sum(points_outof_bounds) 
+
+
+def plot_sliding_window(x_train, x_test, y_train, y_test, mean_train, mean_test, var_train, var_test, pos, labels, iteration):
+    plt.figure(figsize=(20,7))
+    plt.xticks(pos, labels, rotation=45)
+    plt.plot(x_train, y_train, '.', label='Train data', c='black', markersize=3)
+    plt.plot(x_test, y_test, 'x', label='Test data', c='red', markersize=5)
+
+    plt.plot(x_train, mean_train, '-', label='Mean Posterior for train data', c='C0', linewidth=3)
+    c_train = 1.96 * np.sqrt(var_train) 
+    plt.fill_between(x_train[:,0], (mean_train - c_train)[:,0], (mean_train + c_train)[:,0], alpha=0.4, edgecolor='gray', facecolor='C0', label='CI for train')
+
+    plt.vlines(x_test[0], colors='grey', linestyles='dashed', ymin=np.min(y_train), ymax=np.max(y_train))
+
+    c_test = 1.96 * np.sqrt(var_test) 
+    plt.plot(x_test, mean_test, '-', label='Mean Predictive Posterior for test data', c='maroon', linewidth=3)
+    plt.fill_between(x_test[:,0], (mean_test - c_test)[:,0], (mean_test + c_test)[:,0], alpha=0.4, edgecolor='gray', facecolor='grey', label='CI for test')
+    
+    plt.title('Sliding window for iteration ' + str(iteration))
+    plt.xlabel('Date')
+    plt.ylabel('Normalised number of births')
+    
+    plt.legend()
+    plt.show()

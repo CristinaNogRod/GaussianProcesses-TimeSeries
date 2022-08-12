@@ -4,11 +4,14 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+# import warnings
+# warnings.filterwarnings("ignore")
 
 
 def get_birth_data():
     data = pd.read_csv('../../data/birth_data.csv')
     data['date'] = pd.to_datetime(data[['year', 'month', 'day']])
+    data['m-y'] = data['date'].dt.date.apply(lambda x: x.strftime('%Y-%m'))
     data['ids'] = np.arange(1, data.shape[0]+1)
     data['weekday'] = data.day_of_week.apply(lambda x: 1 if x in [1,2,3,4,5] else 0)
     data['monday'] = data.day_of_week.apply(lambda x: 1 if x != 1 else 0)
@@ -33,8 +36,8 @@ def set_season(x):
         return 4
 
 
-def train_test_save(data):
-    df_train, df_test = train_test_split(data, test_size=0.3, random_state=42)
+def train_test_save(df):
+    df_train, df_test = train_test_split(df, test_size=0.3, random_state=42)
     df_train = df_train.sort_values(by='ids')
     df_test = df_test.sort_values(by='ids')
 
@@ -42,11 +45,11 @@ def train_test_save(data):
     y_train = df_train.births
     y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
     y_train = s.fit_transform(y_train)
-    df_train['births'] = y_train
+    df_train.loc[:, 'births'] = y_train
     y_test = df_test.births
     y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
     y_test = s.transform(y_test)
-    df_test['births'] = y_test
+    df_test.loc[:, 'births'] = y_test
 
     df_train.to_csv("../../data/train.csv", index=False)
     df_test.to_csv("../../data/test.csv", index=False)
@@ -55,18 +58,33 @@ def train_test_save(data):
     scaling_params = pd.DataFrame({'Mean': s.mean_, 'Std': s.scale_})
     scaling_params.to_csv("../data/scaling_params.csv", index=False)
 
+def train_test_normalise(train_df, test_df):
+    s = StandardScaler()
+    y_train = train_df.births
+    y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
+    y_train = s.fit_transform(y_train)
+    train_df = train_df.assign(births=y_train)
+    #train_df['births'] = y_train
+    y_test = test_df.births
+    y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
+    y_test = s.transform(y_test)
+    test_df = test_df.assign(births=y_test)
+    #test_df.loc[:, 'births'] = y_test
+    #test_df['births'] = y_test
+    return train_df, test_df
 
-def separate_data(data, weekdays=None, train_test=1):
+
+def separate_data(df, weekdays=None, train_test=1):
     if weekdays == 'weekdays':
-        data = data.loc[data.weekday==1]
+        df = df.loc[df.weekday==1]
     if weekdays == 'weekends':
-        data = data.loc[data.weekday==0]
+        df = df.loc[df.weekday==0]
 
-    x = data.ids
+    x = df.ids
     if train_test == 1:
-        y = data.births
+        y = df.births
     else:
-        y = data.normalised_births
+        y = df.normalised_births
     
     x = tf.cast(x, tf.float64)
     y = tf.cast(y, tf.float64)
@@ -76,10 +94,10 @@ def separate_data(data, weekdays=None, train_test=1):
     return x, y
 
 
-def separate_data_with_monday_flag(data):
-    x = data.ids
-    m = data.monday
-    y = data.births
+def separate_data_with_monday_flag(df):
+    x = df.ids
+    m = df.monday
+    y = df.births
     
     x = tf.cast(x, tf.float64)
     y = tf.cast(y, tf.float64)
