@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-# import warnings
-# warnings.filterwarnings("ignore")
 
 
 def get_birth_data():
@@ -64,13 +62,10 @@ def train_test_normalise(train_df, test_df):
     y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
     y_train = s.fit_transform(y_train)
     train_df = train_df.assign(births=y_train)
-    #train_df['births'] = y_train
     y_test = test_df.births
     y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
     y_test = s.transform(y_test)
     test_df = test_df.assign(births=y_test)
-    #test_df.loc[:, 'births'] = y_test
-    #test_df['births'] = y_test
     return train_df, test_df
 
 

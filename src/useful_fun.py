@@ -62,3 +62,20 @@ def plot_sliding_window(x_train, x_test, y_train, y_test, mean_train, mean_test,
     
     plt.legend()
     plt.show()
+
+
+def split_dataframe_by_position(df, splits):
+    """
+    Takes a dataframe and an integer of the number of splits to create.
+    Returns a list of dataframes.
+    """
+    dataframes = []
+    index_to_split = len(df) // splits
+    start = 0
+    end = index_to_split
+    for split in range(splits):
+        temporary_df = df.iloc[start:end, :]
+        dataframes.append(temporary_df)
+        start += index_to_split
+        end += index_to_split
+    return dataframes
