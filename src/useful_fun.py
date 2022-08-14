@@ -4,22 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_distribution(X, Y, mean, var, pos, labels, legend=True):
+def plot_distribution(X, Y, mean, var, pos, labels, method='bayes', Z=None):
     plt.figure(figsize=(25, 7))
 
     plt.plot(X, Y, '.', color="black", alpha=0.5, markersize=3, label='True (Test) Observation Samples')
     plt.plot(X, mean, color="C0", label='Mean Predictive Posterior')
     c = 1.96 * np.sqrt(var)
-    plt.fill_between(X[:,0], (mean - c)[:,0], (mean + c)[:,0], alpha=0.2, edgecolor='gray', facecolor='C0', label='CI')
+    if method == 'freq':
+        plt.fill_between(X[:,0], (mean - c)[:,0], (mean + c)[:,0], alpha=0.2, edgecolor='gray', facecolor='C0', label='CI')
+    if method == 'bayes':
+        #Z = m.inducing_variable.Z.numpy()
+        plt.plot(Z, np.zeros_like(Z), "k|", color='grey', mew=2, label="Inducing Locations")
+        plt.fill_between(X[:,0], (mean - c)[:,0], (mean + c)[:,0], alpha=0.2, edgecolor='gray', facecolor='C0', label='CI')
 
     plt.xticks(pos, labels)
     plt.xlabel('Date', fontsize=15)
     plt.ylabel('Normalised Births', fontsize=15)
     plt.tick_params(axis='both', which='major', labelsize=12)
-
-    if legend:
-        plt.legend(prop={'size':14})
-
+    plt.legend(prop={'size':14})
     plt.show()
     plt.close()
 
