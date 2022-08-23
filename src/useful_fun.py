@@ -55,11 +55,12 @@ def plot_sliding_window(x_train, x_test, y_train, y_test, mean_train, mean_test,
     plt.plot(x_test, mean_test, '-', label='Mean Predictive Posterior for test data', c='maroon', linewidth=3)
     plt.fill_between(x_test[:,0], (mean_test - c_test)[:,0], (mean_test + c_test)[:,0], alpha=0.4, edgecolor='gray', facecolor='grey', label='95% CI for test')
     
-    plt.title('Sliding window for iteration ' + str(iteration))
-    plt.xlabel('Date')
-    plt.ylabel('Normalised number of births')
+    plt.title('Sliding window for iteration ' + str(iteration), fontsize=15)
+    plt.xlabel('Date', fontsize=15)
+    plt.ylabel('Normalised number of births', fontsize=15)
+    plt.tick_params(axis='both', which='major', labelsize=12)
     
-    plt.legend()
+    plt.legend(prop={'size':14})
     plt.show()
 
 
