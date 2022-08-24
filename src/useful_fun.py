@@ -22,6 +22,23 @@ def plot_distribution(X, Y, mean, var, pos, labels, legend=True):
     plt.show()
     plt.close()
 
+def plot_distribution_gpflux(X, Y, mean, var, pos, labels, legend=True):
+    plt.figure(figsize=(25, 7))
+
+    plt.plot(X, Y, '.', color="black", alpha=0.5, markersize=3, label='True (Test) Observation Samples')
+    plt.plot(X, mean, color="C0", label='Mean Predictive Posterior')
+    c = 1.96 * np.sqrt(var)
+    plt.fill_between(X[:,0], (mean - c), (mean + c), alpha=0.2, edgecolor='gray', facecolor='C0', label='95% CI')
+
+    plt.xticks(pos, labels)
+    plt.xlabel('Date', fontsize=15)
+    plt.ylabel('Normalised Births', fontsize=15)
+    plt.tick_params(axis='both', which='major', labelsize=12)
+    if legend: 
+        plt.legend(prop={'size':14})
+        
+    plt.show()
+    plt.close()
 
 def percentage_outof_CI(Y, mean, var):
     c = 1.96 * np.sqrt(var)
