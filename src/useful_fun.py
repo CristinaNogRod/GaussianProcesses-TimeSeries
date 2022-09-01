@@ -80,6 +80,31 @@ def plot_sliding_window(x_train, x_test, y_train, y_test, mean_train, mean_test,
     plt.legend(prop={'size':14})
     plt.show()
 
+def plot_sliding_window_gpflux(x_train, x_test, y_train, y_test, mean_train, mean_test, var_train, var_test, pos, labels, iteration):
+    plt.figure(figsize=(20, 7))
+
+    plt.xticks(pos, labels, rotation=45)
+    plt.plot(x_train, y_train, '.', label='Train data', c='black', markersize=3)
+    plt.plot(x_test, y_test, 'x', label='Test data', c='red', markersize=5)
+
+    plt.plot(x_train, mean_train, '-', label='Mean Posterior for train data', c='C0', linewidth=3)
+    c_train = 1.96 * np.sqrt(var_train)
+    plt.fill_between(x_train[:,0], (mean_train - c_train), (mean_train + c_train), alpha=0.4, edgecolor='gray', facecolor='C0', label='95% CI')
+
+    plt.vlines(x_test[0], colors='grey', linestyles='dashed', ymin=np.min(y_train), ymax=np.max(y_train))
+
+    c_test = 1.96 * np.sqrt(var_test) 
+    plt.fill_between(x_test[:,0], (mean_test - c_test), (mean_test + c_test), alpha=0.4, edgecolor='gray', facecolor='grey', label='95% CI for test')
+
+    plt.title('Sliding window for iteration ' + str(iteration), fontsize=15)
+    plt.xlabel('Date', fontsize=15)
+    plt.ylabel('Normalised number of births', fontsize=15)
+    plt.tick_params(axis='both', which='major', labelsize=12)
+    
+    plt.legend(prop={'size':14})
+    plt.show()
+    plt.close()
+
 
 def split_dataframe_by_position(df, splits):
     """

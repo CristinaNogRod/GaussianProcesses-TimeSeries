@@ -56,6 +56,40 @@ def train_test_save(df):
     scaling_params = pd.DataFrame({'Mean': s.mean_, 'Std': s.scale_})
     scaling_params.to_csv("../data/scaling_params.csv", index=False)
 
+def weekday_train_test_save(df):
+    df_weekdays = df[df.weekday == 1]
+    weekday_train, weekday_test = train_test_split(df_weekdays, test_size=0.3, random_state=42)
+    weekday_train = weekday_train.sort_values(by='ids')
+    weekday_test = weekday_test.sort_values(by='ids')
+    s = StandardScaler()
+    y_train = weekday_train.births
+    y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
+    y_train = s.fit_transform(y_train)
+    weekday_train.loc[:, 'births'] = y_train
+    y_test = weekday_test.births
+    y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
+    y_test = s.transform(y_test)
+    weekday_test.loc[:, 'births'] = y_test
+    weekday_train.to_csv("../../data/weekday_train.csv", index=False)
+    weekday_test.to_csv("../../data/weekday_test.csv", index=False)
+
+    df_weekends = df[df.weekday == 0]
+    weekend_train, weekend_test = train_test_split(df_weekends, test_size=0.3, random_state=42)
+    weekend_train = weekend_train.sort_values(by='ids')
+    weekend_test = weekend_test.sort_values(by='ids')
+    s = StandardScaler()
+    y_train = weekend_train.births
+    y_train = np.reshape(y_train.to_numpy(), (y_train.shape[0],1))
+    y_train = s.fit_transform(y_train)
+    weekend_train.loc[:, 'births'] = y_train
+    y_test = weekend_test.births
+    y_test = np.reshape(y_test.to_numpy(), (y_test.shape[0],1))
+    y_test = s.transform(y_test)
+    weekend_test.loc[:, 'births'] = y_test
+    weekend_train.to_csv("../../data/weekend_train.csv", index=False)
+    weekend_test.to_csv("../../data/weekend_test.csv", index=False)
+
+
 def train_test_normalise(train_df, test_df):
     s = StandardScaler()
     y_train = train_df.births
@@ -69,12 +103,7 @@ def train_test_normalise(train_df, test_df):
     return train_df, test_df
 
 
-def separate_data(df, weekdays=None, train_test=1):
-    if weekdays == 'weekdays':
-        df = df.loc[df.weekday==1]
-    if weekdays == 'weekends':
-        df = df.loc[df.weekday==0]
-
+def separate_data(df, train_test=1):
     x = df.ids
     if train_test == 1:
         y = df.births
@@ -92,7 +121,7 @@ def separate_data(df, weekdays=None, train_test=1):
 def separate_data_with_monday_flag(df):
     x = df.ids
     m = df.monday
-    y = df.births
+    y = df.normalised_births
     
     x = tf.cast(x, tf.float64)
     y = tf.cast(y, tf.float64)
